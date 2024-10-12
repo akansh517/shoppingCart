@@ -325,9 +325,11 @@
     </div>
     <!-- Address Modal -->
     <div id="addressModal" class="modal">
-      <div class="modal-content">
-        <span onclick="closeAddressPopup()" class="close cursor-pointer"
-          >&times;</span
+      <div class="modal-content relative">
+        <span
+          onclick="closeAddressPopup()"
+          class="close cursor-pointer absolute right-3"
+          >X</span
         >
         <h2 class="text-xl font-semibold mb-4">Select or Add Address</h2>
 
@@ -410,6 +412,13 @@
       function closeAddressPopup() {
         document.getElementById("addressModal").style.display = "none";
       }
+      window.onclick = function (event) {
+        const modal = document.getElementById("addressModal");
+        // Check if the clicked target is the modal background
+        if (event.target === modal) {
+          closeAddressPopup();
+        }
+      };
 
       function isAddressDuplicate(newAddress) {
         const existingAddresses = Array.from(
