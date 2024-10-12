@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding-top: 60px;
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 5% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+      }
+      .boxes {
+        border: 1px solid black;
+        border-radius: 4px;
+        padding: 1rem;
+        background: floralwhite;
+      }
+      .delete-button {
+        font-size: 14px;
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto">
+      <header
+        class="mb-6 flex flex-col justify-center items-center bg-purple-300 p-6"
+      >
+        <h1 class="text-4xl font-bold">Shopping Cart</h1>
+        <nav class="text-sm font-normal text-gray-600 mt-2">
+          Home / Clothing Categories / My Shopping Cart
+        </nav>
+      </header>
+      <div class="flex">
+        <div class="flex-1 pr-8 pl-32">
+          <section class="p-2 mb-4">
+            <h2 class="text-xl font-semibold mb-4">Customer Details</h2>
+            <div class="boxes flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold">Billing Address</h3>
+                <p id="billingAddress" class="text-sm">
+                  C-290, 5th Down Street, Manchester, UK
+                </p>
+              </div>
+              <button
+                onclick="openAddressPopup('billing')"
+                class="border border-gray-400 bg-gray-200 text-black-700 text-sm font-semibold py-1 px-3 rounded mt-3"
+              >
+                CHANGE
+              </button>
+            </div>
+
+            <div class="mt-6 boxes flex justify-between items-start">
+              <div>
+                <h3 class="font-semibold">Shipping Address</h3>
+                <p id="shippingAddress" class="text-sm">
+                  E/90, 15th Downtown Street, South Bay Manchester, UK 89021
+                </p>
+              </div>
+              <button
+                onclick="openAddressPopup('shipping')"
+                class="border border-gray-400 bg-gray-200 text-black-700 text-sm font-semibold py-1 px-3 rounded mt-3"
+              >
+                CHANGE
+              </button>
+            </div>
+            <button
+              onclick="openAddressPopup('new')"
+              class="text-blue-600 text-sm font-semibold mt-6"
+            >
+              + ADD NEW ADDRESS
+            </button>
+          </section>
+          <section class="p-5">
+            <h2
+              class="text-xl font-semibold mb-4 border-2 rounded bg-gray-300 p-2"
+            >
+              PAYMENT METHOD
+            </h2>
+            <div class="flex flex-col">
+              <label class="inline-flex items-center mt-3">
+                <input
+                  type="radio"
+                  class="form-radio h-5 w-5 text-purple-600"
+                  name="paymentMethod"
+                  value="card"
+                  checked
+                  onchange="togglePaymentFields()"
+                />
+                <span class="ml-2 text-gray-700">Debit/Credit Card</span>
+              </label>
+              <div id="cardFields" class="mt-4">
+                <input
+                  class="border-2 border-gray-200 rounded w-full py-2 px-3"
+                  type="text"
+                  id="cardNumber"
+                  placeholder="Enter card number *"
+                  oninput="validateCard()"
+                />
+                <div class="flex space-x-4 mt-4">
+                  <select
+                    id="expiryMonth"
+                    class="border-2 border-gray-200 rounded py-2 px-3"
+                  >
+                    <option value="">MM</option>
+                    <script>
+                      for (let i = 1; i <= 12; i++) {
+                        document.write(
+                          `<option>${i < 10 ? "0" + i : i}</option>`
+                        );
+                      }
+                    </script>
+                  </select>
+                  <select
+                    id="expiryYear"
+                    class="border-2 border-gray-200 rounded py-2 px-3"
+                  >
+                    <option value="">YYYY</option>
+                    <script>
+                      const currentYear = new Date().getFullYear();
+                      for (let i = currentYear; i <= currentYear + 10; i++) {
+                        document.write(`<option>${i}</option>`);
+                      }
+                    </script>
+                  </select>
+                  <input
+                    class="border-2 border-gray-200 rounded py-2 px-3"
+                    type="text"
+                    id="cvv"
+                    placeholder="CVV *"
+                  />
+                  <button
+                    id="payButtonCard"
+                    class="bg-purple-700 text-white font-bold py-2 px-4 rounded hover:bg-purple-900"
+                  >
+                    Pay $120
+                  </button>
+                </div>
+              </div>
+
+              <!-- Netbanking Option -->
+              <label class="inline-flex items-center mt-3">
+                <input
+                  type="radio"
+                  class="form-radio h-5 w-5 text-purple-600"
+                  name="paymentMethod"
+                  value="netbanking"
+                  onchange="togglePaymentFields()"
+                />
+                <span class="ml-2 text-gray-700">Netbanking</span>
+              </label>
+              <div id="netbankingFields" class="mt-4 hidden">
+                <input
+                  class="border-2 border-gray-200 rounded w-full py-2 px-3"
+                  type="text"
+                  placeholder="Enter bank name *"
+                />
+                <input
+                  class="border-2 border-gray-200 rounded w-full py-2 px-3 mt-4 mb-4"
+                  type="text"
+                  placeholder="Account Number *"
+                />
+                <button
+                  id="payButtonNetbanking"
+                  class="bg-purple-700 text-white font-bold py-2 px-4 rounded hover:bg-purple-900"
+                >
+                  Pay $120
+                </button>
+              </div>
+
+              <!-- Google Pay/Wallet Option -->
+              <label class="inline-flex items-center mt-3">
+                <input
+                  type="radio"
+                  class="form-radio h-5 w-5 text-purple-600"
+                  name="paymentMethod"
+                  value="wallet"
+                  onchange="togglePaymentFields()"
+                />
+                <span class="ml-2 text-gray-700">Google Pay/Wallet</span>
+              </label>
+              <div id="walletFields" class="mt-4 hidden">
+                <input
+                  class="border-2 border-gray-200 rounded w-full py-2 px-3 mb-4"
+                  type="text"
+                  placeholder="Enter Wallet ID *"
+                />
+                <button
+                  id="payButtonWallet"
+                  class="bg-purple-700 text-white font-bold py-2 px-4 rounded hover:bg-purple-900"
+                >
+                  Pay $120
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <div class="w-1/3 pr-12">
+          <section class="p-5">
+            <h2 class="text-xl font-semibold mb-4">Your Order</h2>
+            <div class="order-item" data-price="64.00">
+              <div class="flex items-center">
+                <img
+                  alt="Denim Pro Jacket"
+                  src="https://placehold.co/80x80"
+                  class="mr-4"
+                />
+                <div>
+                  <p class="font-semibold">Denim Pro Jacket</p>
+                  <p class="text-sm">Size: XL, Color: Blue</p>
+                  <p class="text-sm">
+                    Qty:
+                    <select
+                      class="quantity border-2 border-gray-200 rounded py-1 px-2"
+                      onchange="updatePrice()"
+                    >
+                      <option value="1">1</option>
+                      <option value="2" selected>2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                  </p>
+                  <p
+                    class="text-purple-500 text-sm font-semibold mt-2 cursor-pointer"
+                    onclick="removeItem(this)"
+                  >
+                    Remove
+                  </p>
+                </div>
+                <p class="font-semibold ml-auto item-price">$64.00</p>
+              </div>
+            </div>
+            <div class="order-item" data-price="46.00">
+              <div class="flex items-center mt-6">
+                <img
+                  alt="Harbour Men Grey Solid Windcheater"
+                  src="https://placehold.co/80x80"
+                  class="mr-4"
+                />
+                <div>
+                  <p class="font-semibold">
+                    Harbour Men Grey Solid Windcheater
+                  </p>
+                  <p class="text-sm">Size: XL, Color: Grey</p>
+                  <p class="text-sm">
+                    Qty:
+                    <select
+                      class="quantity border-2 border-gray-200 rounded py-1 px-2"
+                      onchange="updatePrice()"
+                    >
+                      <option value="1" selected>1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                    </select>
+                  </p>
+                  <p
+                    class="text-purple-500 text-sm font-semibold mt-2 cursor-pointer"
+                    onclick="removeItem(this)"
+                  >
+                    Remove
+                  </p>
+                </div>
+                <p class="font-semibold ml-auto item-price">$46.00</p>
+              </div>
+            </div>
+            <div class="border-2 rounded bg-gray-200 p-5 mt-6 pt-4">
+              <div class="flex justify-between">
+                <p class="text-sm">Delivery Charges</p>
+                <p class="text-sm">
+                  <b
+                    >$10&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    &nbsp;</b
+                  >Express Delivery
+                </p>
+              </div>
+              <div class="flex justify-between mt-4">
+                <p class="text-sm">Coupon Discount</p>
+                <p class="text-sm">
+                  <b>$0 &nbsp;&nbsp; &nbsp; &nbsp; &nbsp;</b>No coupons
+                  available
+                </p>
+              </div>
+            </div>
+
+            <div class="border-2 p-3 bg-slate-50 mt-4 pt-4">
+              <div class="flex justify-between">
+                <p class="font-semibold">Total Payment</p>
+                <p id="totalPayment" class="font-semibold">$120</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <!-- Address Modal -->
+    <div id="addressModal" class="modal">
+      <div class="modal-content">
+        <span onclick="closeAddressPopup()" class="close cursor-pointer"
+          >&times;</span
+        >
+        <h2 class="text-xl font-semibold mb-4">Select or Add Address</h2>
+
+        <div
+          id="addressList"
+          class="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto"
+        >
+          <div class="boxes relative">
+            <p>C-290, 5th Down Street, Manchester, UK</p>
+            <input
+              type="radio"
+              name="addressType"
+              value="billing"
+              onclick="setAddress('C-290, 5th Down Street, Manchester, UK', 'billing')"
+            />
+            Set Billing Address
+            <input
+              type="radio"
+              name="addressType"
+              value="shipping"
+              onclick="setAddress('C-290, 5th Down Street, Manchester, UK', 'shipping')"
+            />
+            Set Shipping Address
+            <button
+              onclick="deleteAddress(this)"
+              class="delete-button absolute top-1 right-1"
+            >
+              x
+            </button>
+          </div>
+          <div class="boxes relative">
+            <p>E/90, 15th Downtown Street, South Bay Manchester, UK 89021</p>
+            <input
+              type="radio"
+              name="addressType"
+              value="billing"
+              onclick="setAddress('E/90, 15th Downtown Street, South Bay Manchester, UK 89021', 'billing')"
+            />
+            Set Billing Address
+            <input
+              type="radio"
+              name="addressType"
+              value="shipping"
+              onclick="setAddress('E/90, 15th Downtown Street, South Bay Manchester, UK 89021', 'shipping')"
+            />
+            Set Shipping Address
+            <button
+              onclick="deleteAddress(this)"
+              class="delete-button absolute top-1 right-1"
+            >
+              x
+            </button>
+          </div>
+        </div>
+
+        <h3 class="text-lg font-semibold mt-4">Add New Address</h3>
+        <input
+          type="text"
+          id="newAddressInput"
+          class="border-2 border-gray-200 rounded w-full py-2 px-3"
+          placeholder="Enter new address"
+        />
+
+        <button
+          onclick="addNewAddress()"
+          class="bg-purple-700 text-white font-bold py-2 px-4 rounded mt-4 hover:bg-purple-900"
+        >
+          Add Address
+        </button>
+      </div>
+    </div>
+    <script>
+      let currentAddressType = "";
+
+      function openAddressPopup(type) {
+        currentAddressType = type;
+        document.getElementById("addressModal").style.display = "block";
+      }
+
+      function closeAddressPopup() {
+        document.getElementById("addressModal").style.display = "none";
+      }
+
+      function isAddressDuplicate(newAddress) {
+        const existingAddresses = Array.from(
+          document.querySelectorAll("#addressList p")
+        ).map((p) => p.textContent.trim());
+
+        const billingAddress = document
+          .getElementById("billingAddress")
+          .textContent.trim();
+        const shippingAddress = document
+          .getElementById("shippingAddress")
+          .textContent.trim();
+
+        return (
+          existingAddresses.includes(newAddress) ||
+          billingAddress === newAddress ||
+          shippingAddress === newAddress
+        );
+      }
+
+      function isBillingAndShippingDifferent(newAddress, type) {
+        const billingAddress = document
+          .getElementById("billingAddress")
+          .textContent.trim();
+        const shippingAddress = document
+          .getElementById("shippingAddress")
+          .textContent.trim();
+
+        if (type === "billing" && newAddress === shippingAddress) {
+          return false;
+        }
+        if (type === "shipping" && newAddress === billingAddress) {
+          return false;
+        }
+        return true;
+      }
+
+      function setAddress(address, type) {
+        if (!isBillingAndShippingDifferent(address, type)) {
+          alert("Billing and shipping addresses must be different.");
+          return;
+        }
+
+        if (type === "billing") {
+          document.getElementById("billingAddress").textContent = address;
+        } else if (type === "shipping") {
+          document.getElementById("shippingAddress").textContent = address;
+        }
+        closeAddressPopup();
+      }
+
+      function addNewAddress() {
+        const newAddress = document
+          .getElementById("newAddressInput")
+          .value.trim();
+
+        if (!newAddress) {
+          alert("Please enter a valid address.");
+          return;
+        }
+
+        if (isAddressDuplicate(newAddress)) {
+          alert("This address is already in use. Please add a unique address.");
+          return;
+        }
+
+        const addressList = document.getElementById("addressList");
+        const newAddressBox = document.createElement("div");
+        newAddressBox.classList.add("boxes", "relative");
+        newAddressBox.innerHTML = `
+      <p>${newAddress}</p>
+      <input type="radio" name="addressType" value="billing" onclick="setAddress('${newAddress}', 'billing')"> Set Billing Address
+      <input type="radio" name="addressType" value="shipping" onclick="setAddress('${newAddress}', 'shipping')"> Set Shipping Address
+      <button onclick="deleteAddress(this)" class="delete-button">x</button>
+    `;
+
+        addressList.appendChild(newAddressBox);
+
+        document.getElementById("newAddressInput").value = "";
+      }
+
+      function deleteAddress(button) {
+        const addressBox = button.closest(".boxes");
+        addressBox.remove();
+      }
+
+      function togglePaymentFields() {
+        const paymentMethods = ["card", "netbanking", "wallet"];
+        paymentMethods.forEach((method) => {
+          const fields = document.getElementById(method + "Fields");
+          const isSelected = document.querySelector(
+            `input[name="paymentMethod"][value="${method}"]`
+          ).checked;
+          fields.style.display = isSelected ? "block" : "none";
+        });
+
+        updatePayButtonText();
+      }
+
+      function updatePayButtonText() {
+        const totalPayment =
+          document.getElementById("totalPayment").textContent;
+        document.getElementById(
+          "payButtonCard"
+        ).textContent = `Pay ${totalPayment}`;
+        document.getElementById(
+          "payButtonNetbanking"
+        ).textContent = `Pay ${totalPayment}`;
+        document.getElementById(
+          "payButtonWallet"
+        ).textContent = `Pay ${totalPayment}`;
+      }
+
+      function validateCard() {
+        const cardNumber = document.getElementById("cardNumber").value;
+        if (cardNumber.length === 16 && !isNaN(cardNumber)) {
+          console.log("Card is valid");
+        } else {
+          console.log("Invalid card number");
+        }
+      }
+
+      function updatePrice() {
+        const items = document.querySelectorAll(".order-item");
+        let total = 0;
+
+        items.forEach((item) => {
+          const price = parseFloat(item.getAttribute("data-price"));
+          const qty = parseInt(item.querySelector(".quantity").value);
+          total += price * qty;
+        });
+
+        const deliveryCharges = 10;
+        total += deliveryCharges;
+        document.getElementById("totalPayment").textContent = `$${total.toFixed(
+          2
+        )}`;
+        updatePayButtonText();
+      }
+
+      function removeItem(element) {
+        const item = element.closest(".order-item");
+        item.remove();
+        updatePrice();
+      }
+
+      updatePrice();
+    </script>
+  </body>
+</html>
